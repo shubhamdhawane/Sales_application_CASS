@@ -1,0 +1,76 @@
+ERROR:
+c2-user@ip-172-31-19-221:~ $ cqlsh 18.209.12.180 -u cassandra Password:
+Connected to prod_Cluster at 18.209.12.180:9042 [cqlsh 6.0.0 | Cassandra 4.0.13 | CQL spec 3.4.5 | Native protocol v5] Use HELP for help. 
+cassandra@cqlsh> CONSISTENCY ALL LOCAL_ONE NODE_LOCAL SERIAL ; ANY LOCAL_QUORUM ONE THREE <enter> EACH_QUORUM LOCAL_SERIAL QUORUM TWO cassandra@cqlsh> CONSISTENCY ONE ;
+Consistency level set to ONE. cassandra@cqlsh> CREATE ROLE sales_user WITH SUPERUSER = false AND LOGIN = true AND PASSWORD = 'PassCode' ; 
+NoHostAvailable: ('Unable to complete the operation against any hosts', {}) cassandra@cqlsh>
+
+SOLUTION
+Even though you successfully connect with cqlsh, when you try to run CREATE ROLE you get:
+
+NoHostAvailable: ('Unable to complete the operation against any hosts', {})
+
+🔎 Why this happens
+
+This error usually appears when:
+
+System_auth keyspace replication is wrong
+
+By default, system_auth (where Cassandra stores users/roles) is created with SimpleStrategy RF=1.
+
+In a multi-DC setup, that means only one replica in one DC.
+
+If you query from another DC, Cassandra cannot find an “alive replica” → NoHostAvailable.
+
+Consistency level mismatch
+
+Even though you set CONSISTENCY ONE, Cassandra still must find at least 1 replica of the system_auth table.
+
+If that replica is in another DC, your node can’t see it.
+
+DC name mismatch
+
+From your earlier nodetool status, Tokyo showed ap-northeast-1a while you wanted ap-northeast-1.
+
+If replication is defined on the wrong DC name, Cassandra won’t find any replicas.
+
+✅ Fix: Make system_auth multi-DC aware
+
+Connect to a node in the DC where system_auth currently exists (probably us-east-1 since you connected to 18.209.12.180 successfully).
+
+Check replication of system_auth:
+
+DESCRIBE KEYSPACE system_auth;
+
+
+You’ll likely see something like:
+
+CREATE KEYSPACE system_auth WITH replication = {
+  'class': 'SimpleStrategy',
+  'replication_factor': '1'
+};
+
+
+Alter it to use NetworkTopologyStrategy across both DCs:
+
+ALTER KEYSPACE system_auth WITH REPLICATION = {
+  'class': 'NetworkTopologyStrategy',
+  'ap-northeast-1': 3,
+  'us-east-1': 3
+};
+
+
+Run a repair so that data (roles, permissions) replicate to both DCs:
+
+nodetool repair system_auth
+
+
+Retry creating the role:
+
+CREATE ROLE sales_user WITH SUPERUSER = false AND LOGIN = true AND PASSWORD = 'PassCode';
+
+🔹 Best Practice
+
+Always use NetworkTopologyStrategy for system_auth, system_distributed, and system_traces keyspaces in multi-DC clusters.
+
+Make sure DC names are consistent across all nodes (ap-northeast-1, not ap-northeast-1a).
