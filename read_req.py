@@ -4,7 +4,7 @@ from datetime import datetime
 
 # --- Cassandra connection setup with authentication ---
 auth_provider = PlainTextAuthProvider(username='cassandra', password='cassandra')
-cluster = Cluster(['192.168.177.131', '192.168.177.132', '192.168.177.133'], auth_provider=auth_provider)
+cluster = Cluster(["13.221.91.243", "18.183.188.248","13.221.91.243", "98.81.78.89"], auth_provider=auth_provider)
  # Replace with your actual IPs if needed
 session = cluster.connect('sales')
 
