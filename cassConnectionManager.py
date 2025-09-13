@@ -7,7 +7,7 @@ from cassandra.query   import SimpleStatement
 from globalSettings    import *
 
 ### connection variables for on-prem Cassandra or DSE
-CASS_CONTACT_POINTS    = ["13.221.91.243", "18.183.188.248","13.221.91.243", "98.81.78.89"] ;
+CASS_CONTACT_POINTS    = ["13.114.153.231", "3.112.224.226","54.226.57.43", "13.220.58.54"] ;
 CASS_PORT              = 9042 ;
 CASS_USERNAME          = "sales_user" ;
 CASS_PASSWORD          = "PassCode" ;
