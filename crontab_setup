@@ -1,4 +1,4 @@
 set and schedule task as per your enviorment by crontab
 
 */1 * * * * python /home/ec2-user/Sales_application_CASS/SalesApp_GenerateOrders.py >>/home/ec2-user/write.log
-*/1 * * * * python /home/ec2-user/Sales_application_CASS/read_query.py >>/home/ec2-user/read.log
+*/1 * * * * python /home/ec2-user/Sales_application_CASS/read_req.py >>/home/ec2-user/read.log
