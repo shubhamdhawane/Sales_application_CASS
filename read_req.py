@@ -1,22 +1,13 @@
-from cassConnectionManager import cassConnect
-from cassandra             import ConsistencyLevel
-from cassandra.query       import SimpleStatement
-from datetime              import datetime, date, timedelta
-from globalSettings        import *
-import sys
-import random
-import uuid
-import math
-import string
-#from cassandra.cluster import Cluster
-#from cassandra.auth import PlainTextAuthProvider
-#from datetime import datetime
+
+from cassandra.cluster import Cluster
+from cassandra.auth import PlainTextAuthProvider
+from datetime import datetime
 
 # --- Cassandra connection setup with authentication ---
-#auth_provider = PlainTextAuthProvider(username='cassandra', password='cassandra')
-#cluster = Cluster(["13.221.91.243", "18.183.188.248","13.221.91.243", "98.81.78.89"], auth_provider=auth_provider)
+auth_provider = PlainTextAuthProvider(username='cassandra', password='cassandra')
+cluster = Cluster(["13.221.91.243", "18.183.188.248","13.221.91.243", "98.81.78.89"], auth_provider=auth_provider)
  # Replace with your actual IPs if needed
-#session = cluster.connect('sales')
+session = cluster.connect('sales')
 
 # --- Function to fetch hourly summary ---
 def get_hourly_summary(order_date, order_hour):
