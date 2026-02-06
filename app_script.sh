@@ -54,10 +54,13 @@ python SalesApp_GenerateProducts.py
 
 echo "===== Updating read_req Cassandra contact points ====="
 sed -i "s|^cluster = Cluster(\[.*\],|cluster = Cluster(${CASS_CONTACT_POINTS},|" read_req.py
+sed -i "s|^CASSANDRA_HOSTS *=.*|CASSANDRA_HOSTS = ['${CASS_NODE1}','${CASS_NODE2}','${CASS_NODE3}']|" read.py
+
 
 echo "===== Configuring cron jobs ====="
 (crontab -l 2>/dev/null; \
 echo "* * * * * /usr/bin/python ${APP_HOME}/SalesApp_GenerateOrders.py >> /home/ec2-user/write.log 2>&1"; \
-echo "* * * * * /usr/bin/python ${APP_HOME}/read_req.py >> /home/ec2-user/read.log 2>&1") | crontab -
+echo "* * * * * /usr/bin/python ${APP_HOME}/read_req.py >> /home/ec2-user/read.log 2>&1"; \
+echo "* * * * * /usr/bin/python ${APP_HOME}/read.py >> /home/ec2-user/read_py.log 2>&1") | crontab -
 
 echo "===== Setup completed successfully ====="
